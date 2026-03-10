@@ -11,8 +11,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Initial Load
     loadAndRender();
 
+    // Chromium/Brave deliberately prevent new tab pages from stealing focus from
+    // the address bar. The only workaround: if we're not already on a ?f URL,
+    // redirect to ourselves with a query param — that navigation is treated as a
+    // real page load which allows focus() to succeed.
+    if (location.search !== '?f') {
+        location.search = '?f';
+    } else {
+        searchInput.focus();
+    }
+
     // 2. Search/filter
     searchInput.addEventListener('input', () => loadAndRender());
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const val = searchInput.value.trim();
+        if (val.startsWith(': ')) {
+            const raw = val.slice(2).trim();
+            let url;
+            if (/^\w+:\/\//.test(raw)) {
+                url = raw;
+            } else if (raw.startsWith('/')) {
+                url = 'file://' + raw;
+            } else {
+                url = 'https://' + raw;
+            }
+            chrome.tabs.getCurrent(tab => chrome.tabs.update(tab.id, { url }));
+        } else if (val.startsWith('!')) {
+            location.href = 'https://duckduckgo.com/?q=' + encodeURIComponent(val);
+        }
+    });
 
     // Untagged toggle
     untaggedBtn.addEventListener('click', () => {
