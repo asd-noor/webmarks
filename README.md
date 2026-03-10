@@ -12,3 +12,7 @@ A minimal Chrome extension that replaces the new tab page with a clean bookmark 
 - **Export to Browser** — saves all bookmarks into a `Webmarks` folder in the bookmarks bar (replaces the folder if it already exists)
 - **Export JSON** — download all bookmarks as a `.json` file
 - **Import JSON** — restore or sync bookmarks from a previously exported file
+
+## License
+
+MIT — see [LICENSE](LICENSE)
