@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Webmark</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            width: 320px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <form id="add-form">
+        <input type="text" id="title-input" placeholder="Title" required>
+        <input type="url" id="url-input" placeholder="https://..." required>
+        <input type="text" id="tags-input" placeholder="Tags (comma separated)">
+        <div class="form-actions">
+            <button type="button" id="pin-toggle" title="Pin on save">★</button>
+            <button type="submit" id="submit-btn">Add Webmark</button>
+        </div>
+    </form>
+    <p id="status"></p>
+    <script src="popup.js"></script>
+</body>
+</html>

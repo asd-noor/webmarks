@@ -1,12 +1,27 @@
 {
     "manifest_version": 3,
-    "name": "Local JSON New Tab",
+    "name": "Webmarks",
     "version": "1.0",
     "description": "A standalone new tab page with local storage and JSON sync.",
     "chrome_url_overrides": {
         "newtab": "index.html"
     },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Add Webmark"
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "mac": "Command+Period",
+                "default": "Ctrl+Period"
+            },
+            "description": "Open the Add Webmark popup"
+        }
+    },
     "permissions": [
-        "storage"
+        "storage",
+        "tabs",
+        "bookmarks"
     ]
 }

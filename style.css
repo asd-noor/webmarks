@@ -12,13 +12,12 @@ body {
     font-family: monospace;
     margin: 0;
     padding: 2rem;
-    display: flex;
-    justify-content: center;
 }
 
 .container {
     width: 100%;
     max-width: 800px;
+    margin: 0 auto;
 }
 
 header {
@@ -50,12 +49,6 @@ button:hover {
     color: var(--bg-color);
 }
 
-#add-form {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-}
-
 input[type="text"], input[type="url"] {
     background-color: transparent;
     border: 1px solid var(--border);
@@ -70,26 +63,87 @@ input:focus {
     outline: 1px solid var(--accent);
 }
 
-.bookmark-item {
+.webmark-item {
     display: flex;
-    align-items: center;
-    padding: 0.5rem 0;
+    align-items: baseline;
+    padding: 0.75rem 0;
     border-bottom: 1px dashed var(--border);
 }
 
-.bookmark-tag {
-    color: #f38ba8;
-    width: 100px;
+#search-wrap {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    padding: 0 0.4rem 0 0;
+}
+
+#search-wrap:focus-within {
+    outline: 1px solid var(--accent);
+}
+
+#search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    margin-bottom: 0;
+    background: transparent;
+}
+
+#filter-bar {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+#untagged-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-color);
+    padding: 0.15rem 0.6rem;
+    font-size: 0.75rem;
+    opacity: 0.5;
+    border-radius: 999px;
+    white-space: nowrap;
     flex-shrink: 0;
 }
 
-.bookmark-link {
-    color: var(--accent);
-    text-decoration: none;
-    flex: 1;
+#untagged-btn:hover {
+    opacity: 1;
+    background: transparent;
+    color: var(--text-color);
 }
 
-.bookmark-link:hover {
+#untagged-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    opacity: 1;
+}
+
+.webmark-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.webmark-tags {
+    color: #6c7086;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    margin-left: 1rem;
+    margin-right: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.webmark-link:hover {
     color: var(--accent-hover);
     text-decoration: underline;
 }
@@ -104,4 +158,129 @@ input:focus {
 .delete-btn:hover {
     background: #f38ba8;
     color: var(--bg-color);
+}
+
+.webmark-item.editing {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.6rem 0;
+}
+
+.webmark-item.editing input {
+    flex: 1;
+    min-width: 80px;
+}
+
+.edit-btn {
+    background: transparent;
+    color: var(--accent);
+    padding: 0.2rem 0.5rem;
+    font-size: 1rem;
+}
+
+.edit-btn:hover {
+    background: var(--accent);
+    color: var(--bg-color);
+}
+
+.pin-btn {
+    background: transparent;
+    color: var(--border);
+    padding: 0.2rem 0.5rem;
+    font-size: 1rem;
+    margin-left: auto;
+}
+
+.pin-btn:hover {
+    background: transparent;
+    color: #cba6f7;
+}
+
+.pin-btn.active {
+    color: #cba6f7;
+}
+
+.save-btn {
+    color: #a6e3a1;
+    background: transparent;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.save-btn:hover {
+    background: #a6e3a1;
+    color: var(--bg-color);
+}
+
+.cancel-btn {
+    background: transparent;
+    color: var(--text-color);
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.5;
+}
+
+.cancel-btn:hover {
+    background: var(--border);
+    color: var(--text-color);
+    opacity: 1;
+}
+
+/* Popup form */
+#add-form {
+    margin-bottom: 0;
+}
+
+#add-form input {
+    margin-bottom: 0.6rem;
+}
+
+#add-form input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    flex: none;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+#submit-btn {
+    flex: 1;
+    box-sizing: border-box;
+}
+
+#pin-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: #6c7086;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+#pin-toggle:hover {
+    color: #cba6f7;
+    border-color: #cba6f7;
+    background: transparent;
+}
+
+#pin-toggle.active {
+    color: #cba6f7;
+    border-color: #cba6f7;
+}
+
+#status {
+    font-size: 0.8rem;
+    margin: 0;
+    padding-top: 0.4rem;
+    color: #a6e3a1;
+    min-height: 0;
 }
