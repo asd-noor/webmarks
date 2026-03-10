@@ -1,6 +1,6 @@
 # Webmarks
 
-A minimal Chrome extension that replaces the new tab page with a clean bookmark manager.
+A minimal Chrome/Brave extension that replaces the new tab page with a clean bookmark manager.
 
 ## Features
 
@@ -12,6 +12,18 @@ A minimal Chrome extension that replaces the new tab page with a clean bookmark 
 - **Export to Browser** — saves all bookmarks into a `Webmarks` folder in the bookmarks bar (replaces the folder if it already exists)
 - **Export JSON** — download all bookmarks as a `.json` file
 - **Import JSON** — restore or sync bookmarks from a previously exported file
+
+## Search bar modes
+
+The search bar doubles as a command bar. Press `Enter` to act on the input.
+
+| Prefix | Example | Action |
+|--------|---------|--------|
+| _(none)_ | `opencode` | Filter bookmarks by title or tag |
+| `! ` | `!gh opencode` | DuckDuckGo bang search |
+| `: ` | `: google.com` | Navigate to a URL (prepends `https://` if no protocol) |
+| `: ` | `: /Users/noor/file.txt` | Open a local file (prepends `file://` for `/` paths) |
+| `: ` | `: file:///path/to/file` | Navigate to any explicit URL scheme (`file://`, `ftp://`, etc.) |
 
 ## License
 
