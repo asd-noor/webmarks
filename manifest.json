@@ -1,0 +1,12 @@
+{
+    "manifest_version": 3,
+    "name": "Local JSON New Tab",
+    "version": "1.0",
+    "description": "A standalone new tab page with local storage and JSON sync.",
+    "chrome_url_overrides": {
+        "newtab": "index.html"
+    },
+    "permissions": [
+        "storage"
+    ]
+}

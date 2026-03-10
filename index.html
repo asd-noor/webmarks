@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bookmarks</h1>
+            <div class="controls">
+                <button id="export-btn">Export JSON</button>
+                <button id="trigger-import-btn">Import JSON</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;" />
+            </div>
+        </header>
+
+        <form id="add-form">
+            <input type="text" id="title-input" placeholder="Title" required>
+            <input type="url" id="url-input" placeholder="https://..." required>
+            <input type="text" id="tag-input" placeholder="Category" required>
+            <button type="submit">Add</button>
+        </form>
+
+        <div id="bookmark-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

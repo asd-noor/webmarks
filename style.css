@@ -1,0 +1,107 @@
+:root {
+    --bg-color: #1e1e2e;
+    --text-color: #cdd6f4;
+    --accent: #89b4fa;
+    --accent-hover: #b4befe;
+    --border: #313244;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: monospace;
+    margin: 0;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+button {
+    background-color: var(--border);
+    color: var(--text-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: var(--accent);
+    color: var(--bg-color);
+}
+
+#add-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+input[type="text"], input[type="url"] {
+    background-color: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-color);
+    padding: 0.5rem;
+    font-family: inherit;
+    flex: 1;
+    border-radius: 4px;
+}
+
+input:focus {
+    outline: 1px solid var(--accent);
+}
+
+.bookmark-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--border);
+}
+
+.bookmark-tag {
+    color: #f38ba8;
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.bookmark-link {
+    color: var(--accent);
+    text-decoration: none;
+    flex: 1;
+}
+
+.bookmark-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+.delete-btn {
+    background: transparent;
+    color: #f38ba8;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.delete-btn:hover {
+    background: #f38ba8;
+    color: var(--bg-color);
+}
