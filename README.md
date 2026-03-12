@@ -15,15 +15,19 @@ A minimal Chrome/Brave extension that replaces the new tab page with a clean boo
 
 ## Search bar modes
 
-The search bar doubles as a command bar. Press `Enter` to act on the input.
+The search bar doubles as a command bar. Suggestions appear as you type; press `Enter` to act on the input.
 
 | Prefix | Example | Action |
 |--------|---------|--------|
 | _(none)_ | `opencode` | Filter bookmarks by title or tag |
+| `/ ` | `/ github` | Search browser history — shows a suggestion dropdown |
+| `> ` | `> dns` | Browse `chrome://` internal pages — shows a suggestion dropdown |
 | `! ` | `!gh opencode` | DuckDuckGo bang search |
 | `: ` | `: google.com` | Navigate to a URL (prepends `https://` if no protocol) |
 | `: ` | `: /Users/noor/file.txt` | Open a local file (prepends `file://` for `/` paths) |
 | `: ` | `: file:///path/to/file` | Navigate to any explicit URL scheme (`file://`, `ftp://`, etc.) |
+
+For the `/ ` and `> ` modes, use `↑`/`↓` to navigate suggestions, `Enter` to open, and `Esc` to dismiss.
 
 ## License
 
