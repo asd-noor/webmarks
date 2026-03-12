@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateHistorySuggestions() {
         const val = searchInput.value;
-        if (!val.startsWith('$ ')) {
+        if (!val.startsWith('/ ')) {
             hideHistorySuggestions();
             return;
         }
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (e.key !== 'Enter') return;
         const val = searchInput.value.trim();
-        if (val.startsWith('$ ')) {
+        if (val.startsWith('/ ')) {
             // Navigate to top history suggestion if available, else do nothing
             if (historyItems.length > 0) {
                 chrome.tabs.getCurrent(tab => chrome.tabs.update(tab.id, { url: historyItems[0].url }));
