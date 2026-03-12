@@ -21,10 +21,154 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.focus();
     }
 
-    // History suggestion dropdown ($ prefix)
+    // History suggestion dropdown (/ prefix) and chrome:// suggestion dropdown (> prefix)
     const historySuggestions = document.getElementById('history-suggestions');
     let historyItems = [];
     let historySelectedIdx = -1;
+
+    // Static list of chrome:// pages with friendly titles
+    // Sourced from chrome://chrome-urls (Chrome 139 Canary) and Chromium source.
+    // Ordered: everyday → settings → developer/internals → account → debug
+    const CHROME_URLS = [
+        // ── Everyday ──────────────────────────────────────────────────────────
+        { url: 'chrome://newtab',                       title: 'New Tab' },
+        { url: 'chrome://history',                      title: 'History' },
+        { url: 'chrome://bookmarks',                    title: 'Bookmarks' },
+        { url: 'chrome://downloads',                    title: 'Downloads' },
+        { url: 'chrome://extensions',                   title: 'Extensions' },
+        { url: 'chrome://extensions/shortcuts',         title: 'Extensions — Keyboard Shortcuts' },
+        { url: 'chrome://extensions-internals',         title: 'Extensions Internals' },
+        { url: 'chrome://apps',                         title: 'Apps' },
+        { url: 'chrome://flags',                        title: 'Flags (Experiments)' },
+        { url: 'chrome://password-manager',             title: 'Password Manager' },
+        { url: 'chrome://print',                        title: 'Print Preview' },
+        { url: 'chrome://dino',                         title: 'Dino Game' },
+        { url: 'chrome://feedback',                     title: 'Send Feedback' },
+        { url: 'chrome://whats-new',                    title: "What's New" },
+        { url: 'chrome://credits',                      title: 'Credits' },
+        { url: 'chrome://terms',                        title: 'Terms of Service' },
+        { url: 'chrome://version',                      title: 'Version / About' },
+        { url: 'chrome://help',                         title: 'Help & Updates' },
+        { url: 'chrome://about',                        title: 'About (all internal URLs)' },
+        { url: 'chrome://chrome-urls',                  title: 'All Chrome URLs' },
+
+        // ── Settings ──────────────────────────────────────────────────────────
+        { url: 'chrome://settings',                     title: 'Settings' },
+        { url: 'chrome://settings/appearance',          title: 'Settings — Appearance' },
+        { url: 'chrome://settings/autofill',            title: 'Settings — Autofill' },
+        { url: 'chrome://settings/content',             title: 'Settings — Content' },
+        { url: 'chrome://settings/cookies',             title: 'Settings — Cookies' },
+        { url: 'chrome://settings/downloads',           title: 'Settings — Downloads' },
+        { url: 'chrome://settings/languages',           title: 'Settings — Languages' },
+        { url: 'chrome://settings/onStartup',           title: 'Settings — On Startup' },
+        { url: 'chrome://settings/passwords',           title: 'Settings — Passwords' },
+        { url: 'chrome://settings/payments',            title: 'Settings — Payment Methods' },
+        { url: 'chrome://settings/performance',         title: 'Settings — Performance' },
+        { url: 'chrome://settings/privacy',             title: 'Settings — Privacy & Security' },
+        { url: 'chrome://settings/reset',               title: 'Settings — Reset' },
+        { url: 'chrome://settings/safetyCheck',         title: 'Settings — Safety Check' },
+        { url: 'chrome://settings/search',              title: 'Settings — Search Engine' },
+        { url: 'chrome://settings/security',            title: 'Settings — Security' },
+        { url: 'chrome://settings/syncSetup',           title: 'Settings — Sync' },
+        { url: 'chrome://settings/system',              title: 'Settings — System' },
+
+        // ── Developer / Network ───────────────────────────────────────────────
+        { url: 'chrome://inspect',                      title: 'Inspect (DevTools targets)' },
+        { url: 'chrome://net-internals',                title: 'Net Internals' },
+        { url: 'chrome://net-internals/#dns',           title: 'Net Internals — DNS' },
+        { url: 'chrome://net-internals/#hsts',          title: 'Net Internals — HSTS' },
+        { url: 'chrome://net-internals/#proxy',         title: 'Net Internals — Proxy' },
+        { url: 'chrome://net-internals/#sockets',       title: 'Net Internals — Sockets' },
+        { url: 'chrome://net-export',                   title: 'Net Export (save network log)' },
+        { url: 'chrome://network-errors',               title: 'Network Error Codes' },
+        { url: 'chrome://tracing',                      title: 'Tracing' },
+        { url: 'chrome://webrtc-internals',             title: 'WebRTC Internals' },
+        { url: 'chrome://webrtc-logs',                  title: 'WebRTC Logs' },
+        { url: 'chrome://serviceworker-internals',      title: 'Service Worker Internals' },
+        { url: 'chrome://indexeddb-internals',          title: 'IndexedDB Internals' },
+        { url: 'chrome://blob-internals',               title: 'Blob Internals' },
+        { url: 'chrome://quota-internals',              title: 'Quota Internals' },
+        { url: 'chrome://process-internals',            title: 'Process Internals (site isolation)' },
+        { url: 'chrome://usb-internals',                title: 'USB Internals' },
+
+        // ── Performance / System ──────────────────────────────────────────────
+        { url: 'chrome://gpu',                          title: 'GPU Info' },
+        { url: 'chrome://memory-internals',             title: 'Memory Internals' },
+        { url: 'chrome://discards',                     title: 'Tab Discards' },
+        { url: 'chrome://histograms',                   title: 'Histograms (page load stats)' },
+        { url: 'chrome://metrics-internals',            title: 'Metrics Internals (UMA)' },
+        { url: 'chrome://ukm',                          title: 'UKM (URL-Keyed Metrics)' },
+        { url: 'chrome://system',                       title: 'System Info (OS / resources)' },
+        { url: 'chrome://sandbox',                      title: 'Sandbox Status' },
+        { url: 'chrome://conflicts',                    title: 'Module Conflicts' },
+        { url: 'chrome://components',                   title: 'Components' },
+
+        // ── Privacy / Security ────────────────────────────────────────────────
+        { url: 'chrome://safe-browsing',                title: 'Safe Browsing' },
+        { url: 'chrome://certificate-manager',          title: 'Certificate Manager' },
+        { url: 'chrome://view-cert',                    title: 'View Certificate' },
+        { url: 'chrome://policy',                       title: 'Policy (Group Policy / MDM)' },
+        { url: 'chrome://management',                   title: 'Management (is this browser managed?)' },
+        { url: 'chrome://privacy-sandbox-internals',    title: 'Privacy Sandbox Internals' },
+        { url: 'chrome://topics-internals',             title: 'Topics API Internals' },
+        { url: 'chrome://attribution-internals',        title: 'Attribution Reporting Internals' },
+        { url: 'chrome://private-aggregation-internals', title: 'Private Aggregation Internals' },
+
+        // ── Media / Bluetooth / Devices ───────────────────────────────────────
+        { url: 'chrome://media-internals',              title: 'Media Internals' },
+        { url: 'chrome://media-engagement',             title: 'Media Engagement' },
+        { url: 'chrome://bluetooth-internals',          title: 'Bluetooth Internals' },
+        { url: 'chrome://device-log',                   title: 'Device Log' },
+
+        // ── Sync / Account ────────────────────────────────────────────────────
+        { url: 'chrome://sync-internals',               title: 'Sync Internals' },
+        { url: 'chrome://signin-internals',             title: 'Sign-in Internals' },
+        { url: 'chrome://identity-internals',           title: 'Identity Token Internals' },
+        { url: 'chrome://gcm-internals',                title: 'GCM (Push Messaging) Internals' },
+
+        // ── AI / Lens / Translate ─────────────────────────────────────────────
+        { url: 'chrome://translate-internals',          title: 'Translate Internals' },
+        { url: 'chrome://on-device-translation-internals', title: 'On-Device Translation Internals' },
+        { url: 'chrome://on-device-internals',          title: 'On-Device AI Internals' },
+        { url: 'chrome://optimization-guide-internals', title: 'Optimization Guide Internals' },
+        { url: 'chrome://suggest-internals',            title: 'Suggest / Autocomplete Internals' },
+        { url: 'chrome://omnibox',                      title: 'Omnibox (address bar debug)' },
+
+        // ── History / NTP ─────────────────────────────────────────────────────
+        { url: 'chrome://ntp-tiles-internals',          title: 'NTP Tiles Internals (Top Sites)' },
+        { url: 'chrome://predictors',                   title: 'Predictors (autocomplete & prefetch)' },
+        { url: 'chrome://site-engagement',              title: 'Site Engagement Scores' },
+        { url: 'chrome://history-clusters-internals',   title: 'History Clusters Internals' },
+
+        // ── Web App / PWA ─────────────────────────────────────────────────────
+        { url: 'chrome://web-app-internals',            title: 'Web App Internals (PWA)' },
+        { url: 'chrome://app-service-internals',        title: 'App Service Internals' },
+
+        // ── Misc Internals ────────────────────────────────────────────────────
+        { url: 'chrome://accessibility',                title: 'Accessibility' },
+        { url: 'chrome://autofill-internals',           title: 'Autofill Internals' },
+        { url: 'chrome://password-manager-internals',   title: 'Password Manager Internals' },
+        { url: 'chrome://download-internals',           title: 'Download Internals' },
+        { url: 'chrome://local-state',                  title: 'Local State (browser prefs JSON)' },
+        { url: 'chrome://prefs-internals',              title: 'Prefs Internals (all preferences JSON)' },
+        { url: 'chrome://crashes',                      title: 'Crashes' },
+        { url: 'chrome://invalidations',                title: 'Invalidations Debug' },
+        { url: 'chrome://user-actions',                 title: 'User Actions Log' },
+        { url: 'chrome://segmentation-internals',       title: 'Segmentation Internals' },
+        { url: 'chrome://commerce-internals',           title: 'Commerce / Shopping Internals' },
+        { url: 'chrome://internals',                    title: 'Internals Hub' },
+        { url: 'chrome://support-tool',                 title: 'Support Tool (diagnostics export)' },
+        { url: 'chrome://webui-gallery',                title: 'WebUI Component Gallery' },
+        { url: 'chrome://interstitials',                title: 'Interstitials (SSL / captive portal previews)' },
+
+        // ── Debug (crash/hang triggers — use with care) ───────────────────────
+        { url: 'chrome://restart',                      title: 'Restart Chrome' },
+        { url: 'chrome://quit',                         title: 'Quit Chrome' },
+        { url: 'chrome://crash',                        title: 'DEBUG: Trigger renderer crash' },
+        { url: 'chrome://kill',                         title: 'DEBUG: Kill renderer process' },
+        { url: 'chrome://hang',                         title: 'DEBUG: Trigger browser hang' },
+        { url: 'chrome://gpucrash',                     title: 'DEBUG: Trigger GPU process crash' },
+    ];
 
     function showHistorySuggestions(items) {
         historyItems = items;
@@ -75,6 +219,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateHistorySuggestions() {
         const val = searchInput.value;
+        if (val.startsWith('> ')) {
+            const query = val.slice(2).trim().toLowerCase();
+            const matches = query
+                ? CHROME_URLS.filter(item =>
+                    item.url.includes(query) || item.title.toLowerCase().includes(query))
+                : CHROME_URLS.slice(0, 10);
+            showHistorySuggestions(matches);
+            return;
+        }
         if (!val.startsWith('/ ')) {
             hideHistorySuggestions();
             return;
@@ -118,7 +271,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (e.key !== 'Enter') return;
         const val = searchInput.value.trim();
-        if (val.startsWith('/ ')) {
+        if (val.startsWith('> ')) {
+            // Navigate to top chrome:// suggestion if available
+            if (historyItems.length > 0) {
+                chrome.tabs.getCurrent(tab => chrome.tabs.update(tab.id, { url: historyItems[0].url }));
+            }
+        } else if (val.startsWith('/ ')) {
             // Navigate to top history suggestion if available, else do nothing
             if (historyItems.length > 0) {
                 chrome.tabs.getCurrent(tab => chrome.tabs.update(tab.id, { url: historyItems[0].url }));
