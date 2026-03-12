@@ -21,13 +21,109 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.focus();
     }
 
+    // History suggestion dropdown ($ prefix)
+    const historySuggestions = document.getElementById('history-suggestions');
+    let historyItems = [];
+    let historySelectedIdx = -1;
+
+    function showHistorySuggestions(items) {
+        historyItems = items;
+        historySelectedIdx = -1;
+        historySuggestions.innerHTML = '';
+        if (items.length === 0) {
+            historySuggestions.hidden = true;
+            return;
+        }
+        items.forEach((item, i) => {
+            const li = document.createElement('li');
+            li.dataset.idx = i;
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'hs-title';
+            titleSpan.textContent = item.title || item.url;
+            const urlSpan = document.createElement('span');
+            urlSpan.className = 'hs-url';
+            urlSpan.textContent = item.url;
+            li.appendChild(titleSpan);
+            li.appendChild(urlSpan);
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault(); // keep input focused
+                chrome.tabs.getCurrent(tab => chrome.tabs.update(tab.id, { url: item.url }));
+            });
+            li.addEventListener('mousemove', () => {
+                setHistoryActive(i);
+            });
+            historySuggestions.appendChild(li);
+        });
+        historySuggestions.hidden = false;
+    }
+
+    function hideHistorySuggestions() {
+        historySuggestions.hidden = true;
+        historyItems = [];
+        historySelectedIdx = -1;
+    }
+
+    function setHistoryActive(idx) {
+        const lis = historySuggestions.querySelectorAll('li');
+        lis.forEach(li => li.classList.remove('active'));
+        historySelectedIdx = idx;
+        if (idx >= 0 && idx < lis.length) {
+            lis[idx].classList.add('active');
+            lis[idx].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function updateHistorySuggestions() {
+        const val = searchInput.value;
+        if (!val.startsWith('$ ')) {
+            hideHistorySuggestions();
+            return;
+        }
+        const query = val.slice(2).trim();
+        chrome.history.search({ text: query, maxResults: 10 }, (results) => {
+            showHistorySuggestions(results);
+        });
+    }
+
     // 2. Search/filter
-    searchInput.addEventListener('input', () => loadAndRender());
+    searchInput.addEventListener('input', () => {
+        loadAndRender();
+        updateHistorySuggestions();
+    });
 
     searchInput.addEventListener('keydown', (e) => {
+        // Handle history suggestion navigation
+        if (!historySuggestions.hidden) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setHistoryActive(Math.min(historySelectedIdx + 1, historyItems.length - 1));
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setHistoryActive(Math.max(historySelectedIdx - 1, 0));
+                return;
+            }
+            if (e.key === 'Escape') {
+                hideHistorySuggestions();
+                return;
+            }
+            if (e.key === 'Enter' && historySelectedIdx >= 0) {
+                e.preventDefault();
+                const selected = historyItems[historySelectedIdx];
+                chrome.tabs.getCurrent(tab => chrome.tabs.update(tab.id, { url: selected.url }));
+                return;
+            }
+        }
+
         if (e.key !== 'Enter') return;
         const val = searchInput.value.trim();
-        if (val.startsWith(': ')) {
+        if (val.startsWith('$ ')) {
+            // Navigate to top history suggestion if available, else do nothing
+            if (historyItems.length > 0) {
+                chrome.tabs.getCurrent(tab => chrome.tabs.update(tab.id, { url: historyItems[0].url }));
+            }
+        } else if (val.startsWith(': ')) {
             const raw = val.slice(2).trim();
             let url;
             if (/^\w+:\/\//.test(raw)) {
@@ -42,6 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
             location.href = 'https://duckduckgo.com/?q=' + encodeURIComponent(val);
         }
     });
+
+    searchInput.addEventListener('blur', () => hideHistorySuggestions());
 
     // Untagged toggle
     untaggedBtn.addEventListener('click', () => {
