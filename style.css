@@ -70,6 +70,39 @@ input:focus {
     border-bottom: 1px dashed var(--border);
 }
 
+#quote-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0 0.1rem;
+    opacity: 0.45;
+}
+
+#quote-text {
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--text-color);
+    line-height: 1.5;
+    flex: 1;
+    min-width: 0;
+}
+
+#quote-author {
+    font-size: 0.72rem;
+    color: var(--accent);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#quote-hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 1.5rem;
+    opacity: 0.5;
+}
+
 #search-wrap {
     display: flex;
     align-items: center;

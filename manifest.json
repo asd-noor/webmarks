@@ -36,5 +36,9 @@
         "tabs",
         "bookmarks",
         "history"
+    ],
+    "host_permissions": [
+        "https://api.quotable.io/*",
+        "https://poetrydb.org/*"
     ]
 }

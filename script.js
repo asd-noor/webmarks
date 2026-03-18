@@ -6,6 +6,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const importFile = document.getElementById('import-file');
     const searchInput = document.getElementById('search-input');
 
+    // 0. Quote banner
+    const FALLBACK_QUOTES = [
+        { text: "The net is vast and infinite.", author: "Ghost in the Shell" },
+        { text: "Any sufficiently advanced technology is indistinguishable from magic.", author: "Arthur C. Clarke" },
+        { text: "The future is already here — it's just not evenly distributed.", author: "William Gibson" },
+        { text: "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away.", author: "Antoine de Saint-Exupéry" },
+        { text: "Programs must be written for people to read, and only incidentally for machines to execute.", author: "Abelson & Sussman" },
+        { text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" },
+        { text: "Do not go gentle into that good night.", author: "Dylan Thomas" },
+        { text: "I am large, I contain multitudes.", author: "Walt Whitman" },
+        { text: "Two roads diverged in a wood, and I — I took the one less traveled by.", author: "Robert Frost" },
+        { text: "I have measured out my life with coffee spoons.", author: "T.S. Eliot" },
+        { text: "Hope is the thing with feathers that perches in the soul.", author: "Emily Dickinson" },
+        { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
+        { text: "The only way out is through.", author: "Robert Frost" },
+        { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+        { text: "So it goes.", author: "Kurt Vonnegut" },
+    ];
+
+    const quoteTextEl  = document.getElementById('quote-text');
+    const quoteAuthorEl = document.getElementById('quote-author');
+    const quoteBanner  = document.getElementById('quote-banner');
+
+    function renderQuote(text, author) {
+        quoteBanner.style.transition = 'opacity 0.35s ease';
+        quoteBanner.style.opacity = '0';
+        setTimeout(() => {
+            quoteTextEl.textContent  = '\u201c' + text + '\u201d';
+            quoteAuthorEl.textContent = '\u2014 ' + author;
+            quoteBanner.style.opacity = '';
+        }, 350);
+    }
+
+    // Show a local fallback immediately so the banner is never empty
+    const fb = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
+    quoteTextEl.textContent  = '\u201c' + fb.text + '\u201d';
+    quoteAuthorEl.textContent = '\u2014 ' + fb.author;
+
+    async function fetchQuotable() {
+        const res  = await fetch('https://api.quotable.io/quotes/random?maxLength=120');
+        const data = await res.json();
+        const q    = Array.isArray(data) ? data[0] : data;
+        return { text: q.content, author: q.author };
+    }
+
+    async function fetchPoetryDB() {
+        const res   = await fetch('https://poetrydb.org/random/1');
+        const data  = await res.json();
+        const poem  = Array.isArray(data) ? data[0] : data;
+        // Take first 2 non-empty lines so it stays compact
+        const lines = poem.lines.filter(l => l.trim()).slice(0, 2).join(' / ');
+        return { text: lines, author: poem.author + ', \u201c' + poem.title + '\u201d' };
+    }
+
+    (async () => {
+        const usePoetry = Math.random() < 0.5;
+        try {
+            const result = await (usePoetry ? fetchPoetryDB() : fetchQuotable());
+            renderQuote(result.text, result.author);
+        } catch (_) {
+            try {
+                const result = await (usePoetry ? fetchQuotable() : fetchPoetryDB());
+                renderQuote(result.text, result.author);
+            } catch (__) {
+                // Both failed — local fallback already showing, nothing to do
+            }
+        }
+    })();
+
     // 1. Initial Load
     loadAndRender();
 
