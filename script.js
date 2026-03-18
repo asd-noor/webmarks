@@ -6,7 +6,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const importFile = document.getElementById('import-file');
     const searchInput = document.getElementById('search-input');
     const untaggedBtn = document.getElementById('untagged-btn');
+    const searchModeBtn = document.getElementById('search-mode-btn');
     let showUntagged = false;
+
+    // Search mode: 'tags' | 'title'
+    const MODES = ['tags', 'title'];
+    const PLACEHOLDERS = {
+        tags:  'Filter by tag... | / history | > chrome:// | !bang | : url',
+        title: 'Filter by title... | / history | > chrome:// | !bang | : url',
+    };
+    let searchMode = 'tags';
+
+    function setSearchMode(mode) {
+        searchMode = mode;
+        searchModeBtn.dataset.mode = mode;
+        searchModeBtn.textContent = mode;
+        searchInput.placeholder = PLACEHOLDERS[mode];
+        loadAndRender();
+    }
+
+    searchModeBtn.addEventListener('click', () => {
+        const next = MODES[(MODES.indexOf(searchMode) + 1) % MODES.length];
+        setSearchMode(next);
+        searchInput.focus();
+    });
 
     // 1. Initial Load
     loadAndRender();
@@ -245,6 +268,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     searchInput.addEventListener('keydown', (e) => {
+        // Tab switches search mode
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const next = MODES[(MODES.indexOf(searchMode) + 1) % MODES.length];
+            setSearchMode(next);
+            return;
+        }
+
         // Handle history suggestion navigation
         if (!historySuggestions.hidden) {
             if (e.key === 'ArrowDown') {
@@ -465,9 +496,13 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.get(['webmarks'], (result) => {
             const webmarks = result.webmarks || [];
             const filtered = query
-                ? webmarks.filter(w =>
-                    w.tags.some(t => t.toLowerCase().includes(query)) ||
-                    w.title.toLowerCase().includes(query))
+                ? webmarks.filter(w => {
+                    if (searchMode === 'tags') {
+                        return w.tags.some(t => t.toLowerCase().includes(query));
+                    } else {
+                        return w.title.toLowerCase().includes(query);
+                    }
+                })
                 : webmarks;
             const displayed = showUntagged ? filtered.filter(w => w.tags.length === 0) : filtered;
             const sorted = [...displayed].sort((a, b) => {
