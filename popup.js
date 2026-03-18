@@ -17,6 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.getElementById('tags-input').addEventListener('keydown', (e) => {
+        if (e.key === '!') e.preventDefault();
+    });
+
     addForm.addEventListener('submit', (e) => {
         e.preventDefault();
 

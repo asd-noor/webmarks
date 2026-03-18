@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const quoteTextEl  = document.getElementById('quote-text');
     const quoteAuthorEl = document.getElementById('quote-author');
     const quoteBanner  = document.getElementById('quote-banner');
+    const quoteHr     = document.getElementById('quote-hr');
 
     function renderQuote(text, author) {
         quoteBanner.style.transition = 'opacity 0.35s ease';
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fb = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
     quoteTextEl.textContent  = '\u201c' + fb.text + '\u201d';
     quoteAuthorEl.textContent = '\u2014 ' + fb.author;
+    quoteHr.classList.add('visible');
 
     async function fetchQuotable() {
         const res  = await fetch('https://api.quotable.io/quotes/random?maxLength=120');
@@ -367,6 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('blur', () => hideHistorySuggestions());
 
     // 3. Delete / Edit / Pin webmark (Event Delegation)
+    container.addEventListener('keydown', (e) => {
+        if (e.target.classList.contains('edit-tags') && e.key === '!') e.preventDefault();
+    });
+
     container.addEventListener('click', (e) => {
         if (e.target.classList.contains('delete-btn')) {
             const idToDelete = e.target.dataset.id;
