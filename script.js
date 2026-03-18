@@ -5,31 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const triggerImportBtn = document.getElementById('trigger-import-btn');
     const importFile = document.getElementById('import-file');
     const searchInput = document.getElementById('search-input');
-    const untaggedBtn = document.getElementById('untagged-btn');
-    const searchModeBtn = document.getElementById('search-mode-btn');
-    let showUntagged = false;
-
-    // Search mode: 'tags' | 'title'
-    const MODES = ['tags', 'title'];
-    const PLACEHOLDERS = {
-        tags:  'Filter by tag... | / history | > chrome:// | !bang | : url',
-        title: 'Filter by title... | / history | > chrome:// | !bang | : url',
-    };
-    let searchMode = 'tags';
-
-    function setSearchMode(mode) {
-        searchMode = mode;
-        searchModeBtn.dataset.mode = mode;
-        searchModeBtn.textContent = mode;
-        searchInput.placeholder = PLACEHOLDERS[mode];
-        loadAndRender();
-    }
-
-    searchModeBtn.addEventListener('click', () => {
-        const next = MODES[(MODES.indexOf(searchMode) + 1) % MODES.length];
-        setSearchMode(next);
-        searchInput.focus();
-    });
 
     // 1. Initial Load
     loadAndRender();
@@ -268,14 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     searchInput.addEventListener('keydown', (e) => {
-        // Tab switches search mode
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const next = MODES[(MODES.indexOf(searchMode) + 1) % MODES.length];
-            setSearchMode(next);
-            return;
-        }
-
         // Handle history suggestion navigation
         if (!historySuggestions.hidden) {
             if (e.key === 'ArrowDown') {
@@ -329,13 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     searchInput.addEventListener('blur', () => hideHistorySuggestions());
-
-    // Untagged toggle
-    untaggedBtn.addEventListener('click', () => {
-        showUntagged = !showUntagged;
-        untaggedBtn.classList.toggle('active', showUntagged);
-        loadAndRender();
-    });
 
     // 3. Delete / Edit / Pin webmark (Event Delegation)
     container.addEventListener('click', (e) => {
@@ -497,25 +457,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const webmarks = result.webmarks || [];
             const filtered = query
                 ? webmarks.filter(w => {
-                    if (searchMode === 'tags') {
-                        return w.tags.some(t => t.toLowerCase().includes(query));
-                    } else {
-                        return w.title.toLowerCase().includes(query);
-                    }
+                    const tokens = query.split(/\s+/).filter(Boolean);
+                    return tokens.every(token => {
+                        if (token === '#!') {
+                            return w.tags.length === 0;
+                        }
+                        if (token.startsWith('#')) {
+                            const tag = token.slice(1);
+                            return tag === '' || w.tags.some(t => t.toLowerCase().includes(tag));
+                        }
+                        return w.title.toLowerCase().includes(token);
+                    });
                 })
                 : webmarks;
-            const displayed = showUntagged ? filtered.filter(w => w.tags.length === 0) : filtered;
-            const sorted = [...displayed].sort((a, b) => {
+            const sorted = [...filtered].sort((a, b) => {
                 return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
             });
             container.innerHTML = '';
 
-            if (displayed.length === 0) {
-                container.innerHTML = showUntagged
-                    ? '<p>No untagged webmarks.</p>'
-                    : query
-                        ? '<p>No webmarks match that search.</p>'
-                        : '<p>No webmarks yet. Add one via the extension button or import a JSON file.</p>';
+            if (filtered.length === 0) {
+                container.innerHTML = query
+                    ? '<p>No webmarks match that search.</p>'
+                    : '<p>No webmarks yet. Add one via the extension button or import a JSON file.</p>';
                 return;
             }
 
@@ -524,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 div.className = 'webmark-item' + (webmark.pinned ? ' pinned' : '');
                 div.innerHTML = `
                     <a href="${webmark.url}" class="webmark-link">${webmark.title}</a>
-                    <span class="webmark-tags">${webmark.tags.map(t => `[${t}]`).join(' ')}</span>
+                    <span class="webmark-tags">${webmark.tags.map(t => `#${t}`).join(' ')}</span>
                     <button class="pin-btn ${webmark.pinned ? 'active' : ''}" data-id="${webmark.id}" title="${webmark.pinned ? 'Unpin' : 'Pin'}">★</button>
                     <button class="edit-btn" data-id="${webmark.id}" title="Edit">✎</button>
                     <button class="delete-btn" data-id="${webmark.id}">x</button>
