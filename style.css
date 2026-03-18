@@ -83,10 +83,12 @@ input:focus {
 
 #search-mode-btn {
     flex-shrink: 0;
+    align-self: stretch;
     border: none;
     border-right: 1px solid var(--border);
-    border-radius: 4px 0 0 4px;
-    padding: 0.3rem 0.65rem;
+    border-radius: 3px 0 0 3px;
+    padding: 0 0.65rem;
+    margin: 0;
     font-size: 0.72rem;
     font-family: inherit;
     font-weight: bold;
@@ -94,7 +96,6 @@ input:focus {
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
-    margin: 0;
 }
 
 #search-mode-btn[data-mode="tags"] {
