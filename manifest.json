@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Webmarks",
-    "version": "5.0",
+    "version": "5.1",
     "description": "A standalone new tab page with local storage and JSON sync.",
     "icons": {
         "16": "icons/icon16.png",

@@ -25,26 +25,24 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: "So it goes.", author: "Kurt Vonnegut" },
     ];
 
-    const quoteTextEl  = document.getElementById('quote-text');
+    const quoteTextEl   = document.getElementById('quote-text');
     const quoteAuthorEl = document.getElementById('quote-author');
-    const quoteBanner  = document.getElementById('quote-banner');
-    const quoteHr     = document.getElementById('quote-hr');
-
-    function renderQuote(text, author) {
-        quoteBanner.style.transition = 'opacity 0.35s ease';
-        quoteBanner.style.opacity = '0';
-        setTimeout(() => {
-            quoteTextEl.textContent  = '\u201c' + text + '\u201d';
-            quoteAuthorEl.textContent = '\u2014 ' + author;
-            quoteBanner.style.opacity = '';
-        }, 350);
-    }
+    const quoteBanner   = document.getElementById('quote-banner');
+    const quoteHr       = document.getElementById('quote-hr');
 
     // Show a local fallback immediately so the banner is never empty
     const fb = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
-    quoteTextEl.textContent  = '\u201c' + fb.text + '\u201d';
-    quoteAuthorEl.textContent = '\u2014 ' + fb.author;
-    quoteHr.classList.add('visible');
+
+    function showQuote(text, author) {
+        quoteTextEl.textContent   = '\u201c' + text + '\u201d';
+        quoteAuthorEl.textContent = '\u2014 ' + author;
+        quoteHr.classList.add('visible');
+        quoteBanner.style.opacity = '0';
+        requestAnimationFrame(() => {
+            quoteBanner.style.transition = 'opacity 0.35s ease';
+            quoteBanner.style.opacity = '';
+        });
+    }
 
     async function fetchQuotable() {
         const res  = await fetch('https://api.quotable.io/quotes/random?maxLength=120');
@@ -57,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const res   = await fetch('https://poetrydb.org/random/1');
         const data  = await res.json();
         const poem  = Array.isArray(data) ? data[0] : data;
-        // Take first 2 non-empty lines so it stays compact
         const lines = poem.lines.filter(l => l.trim()).slice(0, 2).join(' / ');
         return { text: lines, author: poem.author + ', \u201c' + poem.title + '\u201d' };
     }
@@ -66,13 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const usePoetry = Math.random() < 0.5;
         try {
             const result = await (usePoetry ? fetchPoetryDB() : fetchQuotable());
-            renderQuote(result.text, result.author);
+            showQuote(result.text, result.author);
         } catch (_) {
             try {
                 const result = await (usePoetry ? fetchQuotable() : fetchPoetryDB());
-                renderQuote(result.text, result.author);
+                showQuote(result.text, result.author);
             } catch (__) {
-                // Both failed — local fallback already showing, nothing to do
+                // Both failed — show local fallback
+                showQuote(fb.text, fb.author);
             }
         }
     })();
